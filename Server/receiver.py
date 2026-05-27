@@ -15,7 +15,7 @@ from deep_translator import GoogleTranslator
 warnings.filterwarnings("ignore")
 
 # --- Configuration ---
-HOST = '192.168.1.11'
+HOST = '[IP_ADDRESS]'
 PORT = 5000
 ELEVENLABS_API_KEY = "sk_4d3907e31d5b9e021913ab2c8d3f64932390ea41c05c78dd"
 TARGET_LANGUAGE = 'ta'  # Target language code (e.g., 'ta' for Tamil)
