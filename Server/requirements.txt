@@ -8,3 +8,4 @@ webrtcvad
 python-dotenv
 elevenlabs
 deep-translator
+audioop-lts; python_version >= '3.13'

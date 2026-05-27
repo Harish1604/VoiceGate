@@ -20,7 +20,8 @@ from aiohttp import web
 from aiortc import (
     RTCPeerConnection,
     RTCSessionDescription,
-    MediaStreamTrack
+    MediaStreamTrack,
+    MediaStreamError
 )
 
 from pydub import AudioSegment
@@ -318,90 +319,96 @@ class AudioReceiver:
 
     async def start(self):
 
-        while True:
+        try:
+            while True:
 
-            frame = await self.track.recv()
+                frame = await self.track.recv()
 
-            pcm = frame.to_ndarray()
+                pcm = frame.to_ndarray()
 
-            audio_bytes = pcm.tobytes()
+                audio_bytes = pcm.tobytes()
 
-            self.audio_buffer.extend(audio_bytes)
+                self.audio_buffer.extend(audio_bytes)
 
-            # =====================================
-            # VAD
-            # =====================================
+                # =====================================
+                # VAD
+                # =====================================
 
-            for i in range(
-                0,
-                len(audio_bytes) - FRAME_SIZE,
-                FRAME_SIZE
-            ):
+                for i in range(
+                    0,
+                    len(audio_bytes) - FRAME_SIZE,
+                    FRAME_SIZE
+                ):
 
-                chunk = audio_bytes[
-                    i:i + FRAME_SIZE
-                ]
+                    chunk = audio_bytes[
+                        i:i + FRAME_SIZE
+                    ]
 
-                try:
+                    try:
 
-                    speech = (
-                        self.vad.is_speech(
-                            chunk,
-                            SAMPLE_RATE
-                        )
-                    )
-
-                    if speech:
-
-                        self.has_voice = True
-
-                        self.last_voice = (
-                            asyncio
-                            .get_event_loop()
-                            .time()
+                        speech = (
+                            self.vad.is_speech(
+                                chunk,
+                                SAMPLE_RATE
+                            )
                         )
 
-                except Exception:
-                    pass
+                        if speech:
 
-            # =====================================
-            # SILENCE DETECT
-            # =====================================
+                            self.has_voice = True
 
-            if (
-                self.has_voice and
-                asyncio.get_event_loop().time()
-                - self.last_voice >
-                SILENCE_DURATION
-            ):
+                            self.last_voice = (
+                                asyncio
+                                .get_event_loop()
+                                .time()
+                            )
 
-                logger.info(
-                    f"[{self.session_id}] "
-                    f"Processing audio chunk"
-                )
+                    except Exception:
+                        pass
 
-                audio_copy = bytes(
-                    self.audio_buffer
-                )
+                # =====================================
+                # SILENCE DETECT
+                # =====================================
 
-                self.audio_buffer.clear()
+                if (
+                    self.has_voice and
+                    asyncio.get_event_loop().time()
+                    - self.last_voice >
+                    SILENCE_DURATION
+                ):
 
-                self.has_voice = False
-
-                loop = asyncio.get_running_loop()
-
-                mp3_bytes = await loop.run_in_executor(
-                    executor,
-                    pipeline.process_audio,
-                    self.session_id,
-                    audio_copy
-                )
-
-                if mp3_bytes:
-
-                    await self.send_audio_back(
-                        mp3_bytes
+                    logger.info(
+                        f"[{self.session_id}] "
+                        f"Processing audio chunk"
                     )
+
+                    audio_copy = bytes(
+                        self.audio_buffer
+                    )
+
+                    self.audio_buffer.clear()
+
+                    self.has_voice = False
+
+                    loop = asyncio.get_running_loop()
+
+                    mp3_bytes = await loop.run_in_executor(
+                        executor,
+                        pipeline.process_audio,
+                        self.session_id,
+                        audio_copy
+                    )
+
+                    if mp3_bytes:
+
+                        await self.send_audio_back(
+                            mp3_bytes
+                        )
+        except MediaStreamError:
+            logger.info(
+                f"[{self.session_id}] "
+                f"Audio track ended"
+            )
 
     async def send_audio_back(
         self,
