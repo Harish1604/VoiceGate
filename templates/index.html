@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Speech Sender</title>
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+margin-top:100px;
+}
+
+button{
+padding:15px;
+margin:10px;
+font-size:18px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>🎤 Speech Sender</h1>
+
+<button onclick="startMic()">
+Start Speaking
+</button>
+
+<button onclick="stopMic()">
+Stop
+</button>
+
+<p id="status">
+Not Connected
+</p>
+
+
+<script>
+
+async function startMic(){
+
+await fetch('/start')
+
+document
+.getElementById("status")
+.innerText=
+"🎤 Speaking..."
+
+}
+
+
+async function stopMic(){
+
+await fetch('/stop')
+
+document
+.getElementById("status")
+.innerText=
+"Stopped"
+
+}
+
+</script>
+
+</body>
+
+</html>
