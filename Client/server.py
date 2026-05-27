@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 # Dynamic configuration with thread safety (shared settings)
 CONFIG = {
-    "host": "192.168.1.11",
+    "host": "[IP_ADDRESS]",
     "port": 5000,
     "threshold": 300,
     "hangover_ms": 500,
