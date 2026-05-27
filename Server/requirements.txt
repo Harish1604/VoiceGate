@@ -1,26 +1,10 @@
-# Networking / async
-websockets==15.0.1
-
-# Speech-to-text API client (Groq/OpenAI-compatible)
-openai==1.84.0
-
-# Audio processing
-numpy==2.3.0
-sounddevice==0.5.2
-soundfile==0.13.1
-pydub==0.25.1
-
-# Translation
-deep-translator==1.11.4
-
-# Text-to-Speech
-gTTS==2.5.4
-
-# Audio playback
-pygame==2.6.1
-
-# Environment variables
-python-dotenv==1.1.0
-
-# Optional HTTP utilities
-requests==2.32.4
+aiohttp
+aiortc
+av
+numpy
+sounddevice
+pydub
+webrtcvad
+python-dotenv
+elevenlabs
+deep-translator
